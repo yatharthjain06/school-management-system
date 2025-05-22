@@ -38,12 +38,10 @@ def ask_ai(user_input):
             return "Could not determine which grade you meant."
 
     # ✅ Subject-based query
-    if "who" in user_input.lower() and "taking" in user_input.lower():
-        subject = None
-        for sub in ["Math", "Science", "English", "History"]:
-            if sub.lower() in user_input.lower():
-                subject = sub
-                break
+    if any(word in user_input.lower() for word in ["who", "taking", "doing", "studying", "enrolled in", "students taking"]):
+        subjects = ["Math", "Science", "English", "History"]
+        subject = next((sub for sub in subjects if sub.lower() in user_input.lower()), None)
+        
         if not subject:
             return "Could not determine the subject from your question."
 
