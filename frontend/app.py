@@ -53,18 +53,33 @@ def ask_ai(user_input):
         names = [f"{row['student_name']} ({row['grade_name']})" for row in data]
         return f"The following students are taking {subject}: {', '.join(names)}."
 
-    # ✅ Name-based query
+    # ✅ Name-based query (supports multiple matches)
+    name_matches = []
     words = user_input.split()
     for word in words:
-        student_id = get_student_id_by_name(word)
-        if student_id:
+        name_matches = get_student_ids_by_name(word)
+        if name_matches:
+            break
+
+    if len(name_matches) == 1:
+        student_id, name = name_matches[0]
+        data = query_student_info(student_id)
+        if not data:
+            return f"No data found for {name}."
+        grade = data[0]['grade_name']
+        subjects = [row['subject_name'] for row in data]
+        return f"{name} is in {grade} and is taking: {', '.join(subjects)}."
+    elif len(name_matches) > 1:
+        results = []
+        for student_id, name in name_matches:
             data = query_student_info(student_id)
             if not data:
-                return f"No data found for {word}."
-            name = data[0]['student_name']
+                continue
             grade = data[0]['grade_name']
             subjects = [row['subject_name'] for row in data]
-            return f"{name} is in {grade} and is taking: {', '.join(subjects)}."
+            results.append(f"{name} is in {grade} and is taking: {', '.join(subjects)}.")
+        return "\n\n".join(results)
+
 
     # ❌ Fallback
     return "Could not extract a student ID, name, or grade from your question."
