@@ -7,4 +7,3 @@ app.use(cors());
 app.use('/student', studentRoutes);
 
 app.listen(3001, () => console.log('API running on port 3001'));
-
