@@ -2,6 +2,13 @@ const express = require('express');
 const router = express.Router();
 const db = require('../db');
 
+router.get('/all', (req, res) => {
+    const query = `SELECT student_id, student_name FROM Student`;
+    db.query(query, (err, result) => {
+        if (err) res.status(500).send(err);
+        else res.send(result);
+    });
+});
 router.get('/subject/:name/students', (req, res) => {
     const subjectName = req.params.name;
     const query = `
