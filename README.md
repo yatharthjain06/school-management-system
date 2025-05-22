@@ -153,13 +153,27 @@ Returns helpful error message.
 
 ```
 school-management-system/
-├── backend/         # Node.js API for MySQL queries
-├── frontend/        # Gradio frontend using OpenRouter AI
-├── database/        # SQL schema and test seed data
-├── screenshots/     # Screenshots for demo
-├── mcp_clients/     # (Optional) Python/JS MCP clients
-├── .env             # Environment variables (local)
-└── README.md
+├── backend/                 # Node.js API for MySQL queries
+│   ├── routes/             # API route handlers
+│   ├── server.js           # Express server setup
+│   ├── db.js              # Database connection
+│   └── package.json       # Node.js dependencies
+├── frontend/               # Gradio frontend using OpenRouter AI
+│   ├── app.py             # Main Gradio application
+│   ├── tools/             # MCP tool implementations
+│   └── requirements.txt   # Python dependencies
+├── database/              # SQL schema and test seed data
+│   ├── schema.sql        # Database schema
+│   └── seed_data.sql     # Sample data
+├── screenshots/           # Screenshots for demo
+├── mcp_clients/          # Python/JS MCP clients
+│   ├── python_client.py  # Python MCP client
+│   └── js_client/        # JavaScript MCP client
+│       ├── index.js      # Main client code
+│       └── package.json  # Node.js dependencies
+├── .gitignore           # Git ignore rules
+├── run.sh               # Quick start script
+└── README.md            # Project documentation
 ```
 
 ---
