@@ -63,9 +63,18 @@ python app.py
 
 And go to http://127.0.0.1:7860
 
-Here are some test case screenshots that you can run as well:
+## 📸 Example Screenshots
 
-![ID 1](screenshots/ss1.png)
-![Science](screenshots/ss2.png)
-![Alice](screenshots/ss3.png)
-![Error](screenshots/ss4.png)
+Here are some example queries you can try:
+
+- 🔢 Query by Student ID:
+  ![ID 1](screenshots/ss1.png)
+
+- 📘 Query by Subject:
+  ![Science](screenshots/ss2.png)
+
+- 🧍 Query by Student Name:
+  ![Alice](screenshots/ss3.png)
+
+- ⚠️ Error Handling:
+  ![Error](screenshots/ss4.png)
