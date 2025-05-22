@@ -65,19 +65,7 @@ And go to http://127.0.0.1:7860
 
 Here are some test case screenshots that you can run as well:
 
-## 📸 Screenshots
-
-To add screenshots to this README:
-
-1. Save your screenshots in the `screenshots/` directory
-2. Use the following Markdown syntax to add them:
-
-```markdown
-![Description of the screenshot](screenshots/your-screenshot.png)
-```
-
-For example:
-![ID 1](ss1.png)
-![Science](ss2.png)
-![Alice](ss3.png)
-![Error](ss4.png)
+![ID 1](screenshots/ss1.png)
+![Science](screenshots/ss2.png)
+![Alice](screenshots/ss3.png)
+![Error](screenshots/ss4.png)
