@@ -1,0 +1,16 @@
+# Python
+__pycache__/
+*.pyc
+venv/
+.env
+
+# Node
+node_modules/
+*.log
+
+# OS
+.DS_Store
+
+# VSCode or JetBrains
+.vscode/
+.idea/
