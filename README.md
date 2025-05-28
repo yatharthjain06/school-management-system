@@ -36,7 +36,7 @@ Then run:
 
 ```bash
 mysql -u root -p school < database/schema.sql
-mysql -u root -p school < database/seed_data.sql
+mysql -u root -p school < database/bulk_seed_with_base.sql
 ```
 
 You can verify with:
