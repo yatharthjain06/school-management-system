@@ -53,4 +53,19 @@ router.get('/:id/subjects', (req, res) => {
       else res.send(result);
   });
 });
+router.get('/student/subjects/by-name', async (req, res) => {
+  const { name } = req.query;
+  const sql = `
+    SELECT DISTINCT sub.subject_name 
+    FROM Student s
+    JOIN StudentGradeSubject sgs ON s.student_id = sgs.student_id
+    JOIN Subject sub ON sgs.subject_id = sub.subject_id
+    WHERE s.student_name LIKE ?
+  `;
+  const likeName = `%${name}%`;
+  db.query(sql, [likeName], (err, results) => {
+    if (err) return res.status(500).json({ error: err });
+    res.json(results);
+  });
+});
 module.exports = router;
