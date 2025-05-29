@@ -14,45 +14,62 @@ class ConversationalBot:
     def __init__(self):
         self.conversation_history = []
         self.current_context = {}
-    
+
     def get_completion(self, messages):
         response = client.chat.completions.create(
             model="gpt-3.5-turbo",
             messages=messages,
-            functions=[{
-                "name": "query_student_info",
-                "description": "Get information about a student by their ID",
-                "parameters": {
-                    "type": "object",
-                    "properties": {
-                        "student_id": {
-                            "type": "integer",
-                            "description": "The ID of the student"
-                        }
-                    },
-                    "required": ["student_id"]
+            functions=[
+                {
+                    "name": "query_student_info",
+                    "description": "Get information about a student by their ID",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "student_id": {
+                                "type": "integer",
+                                "description": "The ID of the student"
+                            }
+                        },
+                        "required": ["student_id"]
+                    }
+                },
+                {
+                    "name": "get_student_by_subject",
+                    "description": "Find students taking a specific subject",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "subject": {
+                                "type": "string",
+                                "description": "The name of the subject"
+                            }
+                        },
+                        "required": ["subject"]
+                    }
+                },
+                {
+                    "name": "get_student_id_by_name",
+                    "description": "Get a student ID based on full name",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "name": {
+                                "type": "string",
+                                "description": "The full name of the student"
+                            }
+                        },
+                        "required": ["name"]
+                    }
                 }
-            }, {
-                "name": "get_student_by_subject",
-                "description": "Find students taking a specific subject",
-                "parameters": {
-                    "type": "object",
-                    "properties": {
-                        "subject": {
-                            "type": "string",
-                            "description": "The name of the subject"
-                        }
-                    },
-                    "required": ["subject"]
-                }
-            }],
+            ],
             function_call="auto"
         )
         return response.choices[0].message
 
     def format_response(self, data, query_type="student"):
         if not data or len(data) == 0:
-            return "No data found for this student."
+            return "No data found."
         if query_type == "student":
             name = data[0]['student_name']
             grade = data[0]['grade_name']
@@ -61,70 +78,96 @@ class ConversationalBot:
         return data
 
     def process_query(self, user_input):
-        # Add user's message to history
         self.conversation_history.append({"role": "user", "content": user_input})
-        
-        # Limit the number of messages to avoid exceeding context window
+
         MAX_HISTORY = 10
         messages = [
-            {"role": "system", "content": """You are a helpful school management assistant. 
-             You can look up student information by ID, name, grade, or find students by subject.
-             When you need specific student data, call the appropriate function."""},
+            {"role": "system", "content": """You are a helpful school assistant. 
+            You can retrieve student data by name, ID, or subject. 
+            Call a function when needed to get real data."""},
             *self.conversation_history[-MAX_HISTORY:]
         ]
-        
+
         response = self.get_completion(messages)
-        
-        # Handle function calls if LLM requests data
+
         if response.function_call:
             function_name = response.function_call.name
             function_args = eval(response.function_call.arguments)
-            
+
             if function_name == "query_student_info":
                 data = query_student_info(function_args["student_id"])
                 result = self.format_response(data, "student")
+
             elif function_name == "get_student_by_subject":
                 base_url = os.getenv("API_BASE", "http://localhost:3001")
                 r = requests.get(f"{base_url}/student/subject/{function_args['subject']}/students")
                 data = r.json()
-                result = f"Students taking {function_args['subject']}: " + ", ".join([f"{s['student_name']} ({s['grade_name']})" for s in data])
-            
-            # Add result to conversation
-            self.conversation_history.append({"role": "function", 
-                                           "name": function_name, 
-                                           "content": result or ""})
-            
-            # Get final response from LLM
-            messages.append({"role": "function", 
-                           "name": function_name, 
-                           "content": result or ""})
+                result = f"Students taking {function_args['subject']}: " + ", ".join(
+                    [f"{s['student_name']} ({s['grade_name']})" for s in data])
+
+            elif function_name == "get_student_id_by_name":
+                student_id = get_student_id_by_name(function_args["name"])
+                if student_id:
+                    data = query_student_info(student_id)
+                    result = self.format_response(data, "student")
+                else:
+                    result = f"No student found with the name {function_args['name']}."
+
+            self.conversation_history.append({
+                "role": "function",
+                "name": function_name,
+                "content": result or ""
+            })
+
+            messages.append({
+                "role": "function",
+                "name": function_name,
+                "content": result or ""
+            })
+
             response = self.get_completion(messages)
-        
-        # Add LLM's response to history
-        self.conversation_history.append({"role": "assistant", 
-                                        "content": response.content or ""})
-        
+
+        self.conversation_history.append({
+            "role": "assistant",
+            "content": response.content or ""
+        })
+
         return response.content
 
-# Initialize bot
 bot = ConversationalBot()
 
 def chat_interface(user_input):
-    response = bot.process_query(user_input)
-    return response
+    return bot.process_query(user_input)
 
-# Gradio interface
 demo = gr.Interface(
     fn=chat_interface,
     inputs=gr.Textbox(
         label="Ask about students, subjects, or grades",
-        placeholder="e.g., 'What subjects is Alice taking?' or 'Who's in Science class?'"
+        placeholder="e.g., 'What subjects is Karina White taking?'"
     ),
     outputs=gr.Textbox(label="Response"),
     title="School Management Assistant",
-    description="I can help you find information about students, their subjects, and grades."
+    description="Ask about students and their academic data."
 )
 
 if __name__ == "__main__":
     print("Launching Gradio...")
     demo.launch(share=True)
+
+def get_student_id_by_name(name_query):
+    base_url = os.getenv("API_BASE", "http://localhost:3001")
+    response = requests.get(f"{base_url}/student/all")
+    if response.status_code != 200:
+        return None
+    name_query = name_query.strip().lower()
+    students = response.json()
+    for student in students:
+        full_name = student['student_name'].strip().lower()
+        name_parts = full_name.split()
+        # Match full name or any part of the name
+        if (
+            name_query == full_name or
+            name_query in name_parts
+        ):
+            return student['student_id']
+    return None
