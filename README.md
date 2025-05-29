@@ -80,9 +80,14 @@ pip install -r requirements.txt
 Create a `.env` file in the root or frontend folder with:
 
 ```env
+# OpenAI API Configuration
+OPENAI_API_KEY=YOUR_API_KEY
+
+# Backend API Configuration
 API_BASE=http://localhost:3001
-OPENROUTER_API_KEY=org-xxxxxxxx
-LLM_MODEL=openai/gpt-3.5-turbo
+
+# LLM Model Selection
+LLM_MODEL=gpt-3.5-turbo
 ```
 
 Then run the app:
